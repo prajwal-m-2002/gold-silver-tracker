@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${metalType.displayName} + ' Investments - Gold & Silver Tracker'">Metal Investments</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <a href="/" class="navbar-brand">
+                <span class="icon">💎</span>
+                <span>Gold & Silver Tracker</span>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="/">Dashboard</a></li>
+                <li><a href="/gold" th:classappend="${metalType.name() == 'GOLD'} ? 'active' : ''">🟡
+                        Gold</a></li>
+                <li><a href="/silver" th:classappend="${metalType.name() == 'SILVER'} ? 'active' : ''">⚪
+                        Silver</a></li>
+                <li><a href="/prices">Update Prices</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <!-- Page Header with Metal Toggle -->
+            <div class="page-header">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <h1 class="page-title" style="display: flex; align-items: center; gap: 1rem;">
+                            <span th:text="${metalType.name() == 'GOLD'} ? '🟡' : '⚪'">🟡</span>
+                            <span th:text="${metalType.displayName} + ' Investments'">Metal Investments</span>
+                        </h1>
+                        <p class="page-subtitle">Track your precious metal purchases</p>
+                    </div>
+
+                    <!-- Toggle Button -->
+                    <div class="btn-group"
+                        style="display: flex; gap: 0.5rem; background: var(--bg-secondary); padding: 0.25rem; border-radius: var(--radius-md);">
+                        <a href="/gold"
+                            th:classappend="${metalType.name() == 'GOLD'} ? 'btn btn-gold' : 'btn btn-outline btn-sm'"
+                            style="text-decoration: none;">
+                            🟡 Gold
+                        </a>
+                        <a href="/silver"
+                            th:classappend="${metalType.name() == 'SILVER'} ? 'btn btn-silver' : 'btn btn-outline btn-sm'"
+                            style="text-decoration: none;">
+                            ⚪ Silver
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flash Messages -->
+            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+            <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+            <!-- Summary Cards -->
+            <div class="stats-grid"
+                style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); margin-bottom: 2rem;">
+                <div class="stat-card" th:classappend="${metalType.name() == 'GOLD'} ? 'gold' : 'silver'">
+                    <div class="stat-icon">⚖️</div>
+                    <div class="stat-label">Total Grams</div>
+                    <div class="stat-value">
+                        <span th:text="${#numbers.formatDecimal(totalGrams, 1, 5)}">0.00000</span>
+                        <span class="unit">g</span>
+                    </div>
+                </div>
+
+                <div class="stat-card" th:classappend="${metalType.name() == 'GOLD'} ? 'gold' : 'silver'">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-label">Total Invested</div>
+                    <div class="stat-value">
+                        <span class="currency">₹</span>
+                        <span th:text="${#numbers.formatDecimal(totalAmount, 1, 2)}">0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Investment Button -->
+            <div style="margin-bottom: 1.5rem;">
+                <a th:href="@{/investments/add(metalType=${metalType})}" class="btn btn-primary">
+                    ➕ Add New Investment
+                </a>
+            </div>
+
+            <!-- Investments Table -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">📊 Investment History</h3>
+                </div>
+
+                <div th:if="${!#lists.isEmpty(investments)}" class="table-container" style="overflow-x: auto;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Metal</th>
+                                <th>Amount Invested</th>
+                                <th>Grams Purchased</th>
+                                <th th:text="|Today's ${metalType.displayName} Rate|">Today's Rate</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="investment : ${investments}">
+                                <td th:text="${#temporals.format(investment.purchaseDate, 'dd MMM yyyy')}"
+                                    style="white-space: nowrap;">01 Jan 2024</td>
+                                <td>
+                                    <span class="badge"
+                                        th:classappend="${investment.metalType.name() == 'GOLD'} ? 'badge-gold' : 'badge-silver'"
+                                        th:text="${investment.metalType.displayName}">Gold</span>
+                                </td>
+                                <td><strong>₹<span
+                                            th:text="${#numbers.formatDecimal(investment.amount, 1, 2)}">0.00</span></strong>
+                                </td>
+                                <td><span th:text="${#numbers.formatDecimal(investment.grams, 1, 5)}">0.00000</span> g
+                                </td>
+                                <td style="white-space: nowrap;">
+                                    <span th:if="${investment.todayRate != null}">
+                                        <strong>₹<span
+                                                th:text="${#numbers.formatDecimal(investment.todayRate, 1, 2)}">0.00</span></strong>/g
+                                    </span>
+                                    <span th:if="${investment.todayRate == null}"
+                                        style="color: var(--text-secondary); font-size: 0.875rem;">
+                                        Not set
+                                    </span>
+                                </td>
+                                <td>
+                                    <div style="display: flex; gap: 0.5rem; min-width: 160px;">
+                                        <a th:href="@{/investments/edit/{id}(id=${investment.id})}"
+                                            class="btn btn-outline btn-sm">✏️ Edit</a>
+                                        <form th:action="@{/investments/delete/{id}(id=${investment.id})}" method="post"
+                                            style="display: inline;"
+                                            onsubmit="return confirm('Are you sure you want to delete this investment?');">
+                                            <input type="hidden" name="metalType" th:value="${metalType.name()}" />
+                                            <button type="submit" class="btn btn-danger btn-sm">🗑️ Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div th:if="${#lists.isEmpty(investments)}" class="empty-state">
+                    <div class="empty-state-icon">📊</div>
+                    <h3 th:text="'No ' + ${metalType.displayName} + ' investments yet'">No investments yet</h3>
+                    <p
+                        th:text="'Start tracking your ' + ${metalType.displayName} + ' investments by adding your first entry.'">
+                        Add first investment</p>
+                </div>
+            </div>
+
+            <!-- Daily Price History Section -->
+            <div class="card fade-in" style="margin-top: 2rem;">
+                <div class="card-header">
+                    <h3 class="card-title">📉 Daily Price History</h3>
+                    <button class="btn btn-outline btn-sm"
+                        onclick="document.getElementById('add-price-form').style.display='block'">
+                        ➕ Add Price
+                    </button>
+                </div>
+
+                <!-- Add Price Form (Hidden by default) -->
+                <div id="add-price-form"
+                    style="display: none; background: var(--bg-card); padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 1rem;">
+                    <form th:action="@{/daily-price/add}" method="post"
+                        style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 1rem; align-items: end;">
+                        <input type="hidden" name="metalType" th:value="${metalType}" />
+                        <div class="form-group" style="margin: 0;">
+                            <label class="form-label">Date</label>
+                            <input type="date" name="priceDate" class="form-control" required />
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label class="form-label">Price per Gram (₹)</label>
+                            <input type="number" step="0.01" name="pricePerGram" class="form-control" required />
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button type="submit" class="btn btn-success btn-sm">Save</button>
+                            <button type="button" class="btn btn-outline btn-sm"
+                                onclick="document.getElementById('add-price-form').style.display='none'">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div th:if="${!#lists.isEmpty(priceHistory)}" class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th th:text="${metalType.displayName} + ' Price per Gram'">Price per Gram</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="price : ${priceHistory}">
+                                <td th:text="${#temporals.format(price.priceDate, 'dd MMM yyyy')}">01 Jan 2024</td>
+                                <td>₹<span th:text="${#numbers.formatDecimal(price.pricePerGram, 1, 2)}">0.00</span>
+                                </td>
+                                <td>
+                                    <form th:action="@{/daily-price/delete/{id}(id=${price.id})}" method="post"
+                                        style="display: inline;"
+                                        onsubmit="return confirm('Are you sure you want to delete this price entry?');">
+                                        <input type="hidden" name="metalType" th:value="${metalType.name()}" />
+                                        <button type="submit" class="btn btn-danger btn-sm">🗑️ Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div th:if="${#lists.isEmpty(priceHistory)}" class="empty-state">
+                    <div class="empty-state-icon">📉</div>
+                    <h3>No price history yet</h3>
+                    <p th:text="'Add daily prices to track ' + ${metalType.displayName} + ' market trends over time.'">
+                        Add daily prices</p>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

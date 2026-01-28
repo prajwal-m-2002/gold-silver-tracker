@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Investment - Gold & Silver Tracker</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <a href="/" class="navbar-brand">
+                <span class="icon">💎</span>
+                <span>Gold & Silver Tracker</span>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="/">Dashboard</a></li>
+                <li><a href="/gold">🟡 Gold</a></li>
+                <li><a href="/silver">⚪ Silver</a></li>
+                <li><a href="/prices">Update Prices</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container" style="max-width: 600px;">
+            <div class="page-header">
+                <h1 class="page-title">Add New Investment</h1>
+                <p class="page-subtitle">Record your precious metal purchase</p>
+            </div>
+
+            <div class="card fade-in">
+                <form th:action="@{/investments/add}" th:object="${investment}" method="post">
+                    <div class="form-group">
+                        <label class="form-label" for="metalType">Metal Type *</label>
+                        <select class="form-control form-select" id="metalType" th:field="*{metalType}" required>
+                            <option value="">Select Metal...</option>
+                            <option th:each="metal : ${metalTypes}" th:value="${metal}" th:text="${metal.displayName}">
+                                Gold</option>
+                        </select>
+                        <div class="error-message" th:if="${#fields.hasErrors('metalType')}" th:errors="*{metalType}">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="purchaseDate">Date of Purchase *</label>
+                        <input type="date" class="form-control" id="purchaseDate" th:field="*{purchaseDate}" required>
+                        <div class="error-message" th:if="${#fields.hasErrors('purchaseDate')}"
+                            th:errors="*{purchaseDate}"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="amount">Amount Invested (₹) *</label>
+                        <input type="number" step="0.01" class="form-control" id="amount" th:field="*{amount}"
+                            placeholder="Enter amount in rupees" required>
+                        <div class="error-message" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="grams">Grams Purchased *</label>
+                        <input type="number" step="0.00001" class="form-control" id="grams" th:field="*{grams}"
+                            placeholder="Enter grams purchased" required>
+                        <div class="error-message" th:if="${#fields.hasErrors('grams')}" th:errors="*{grams}"></div>
+                        <p style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 0.5rem;">
+                            💡 Enter the exact grams you purchased (check your receipt)
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="todayPricePerGram" id="priceLabel">
+                            Today's Price per Gram (₹) *
+                        </label>
+                        <input type="number" step="0.01" class="form-control" id="todayPricePerGram"
+                            th:field="*{todayPricePerGram}" placeholder="Enter current market price" required>
+                        <div class="error-message" th:if="${#fields.hasErrors('todayPricePerGram')}"
+                            th:errors="*{todayPricePerGram}"></div>
+                        <p style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 0.5rem;">
+                            📊 This price will be stored and used to calculate profit/loss
+                        </p>
+                    </div>
+
+                    <div
+                        style="background: rgba(99, 102, 241, 0.1); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem;">
+                        <p style="margin: 0; color: var(--text-secondary); font-size: 0.875rem;">
+                            📌 <strong>Example:</strong> If you bought ₹10,000 worth of gold at ₹6,000/g and received
+                            1.667 grams, enter:
+                            <br>• Amount: ₹10,000
+                            <br>• Grams: 1.667
+                            <br>• Today's Price: ₹6,000
+                        </p>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">💰 Add Investment</button>
+                        <a th:href="@{${investment.metalType != null ? '/' + investment.metalType.name().toLowerCase() : '/'}}"
+                            class="btn btn-outline">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Auto-update label and auto-fill price when metal type changes
+        document.getElementById('metalType').addEventListener('change', async function () {
+            const metalType = this.value;
+            const priceLabel = document.getElementById('priceLabel');
+
+            if (metalType) {
+                // Update label
+                const metalName = this.options[this.selectedIndex].text;
+                priceLabel.textContent = `Today's ${metalName} Price per Gram (₹) *`;
+
+                // Try to auto-fill from current price
+                try {
+                    const response = await fetch(`/api/current-price?metalType=${metalType}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        document.getElementById('todayPricePerGram').value = data.price.toFixed(2);
+                    }
+                } catch (e) {
+                    console.log('Could not auto-fill price');
+                }
+            } else {
+                priceLabel.textContent = "Today's Price per Gram (₹) *";
+            }
+        });
+
+        // Load on page load if metal type is pre-selected
+        window.addEventListener('load', function () {
+            const metalType = document.getElementById('metalType').value;
+            if (metalType) {
+                document.getElementById('metalType').dispatchEvent(new Event('change'));
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Prices - Gold & Silver Tracker</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <a href="/" class="navbar-brand">
+                <span class="icon">💎</span>
+                <span>Gold & Silver Tracker</span>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="/">Dashboard</a></li>
+                <li><a href="/gold">🟡 Gold</a></li>
+                <li><a href="/silver">⚪ Silver</a></li>
+                <li><a href="/prices" class="active">Update Prices</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container" style="max-width: 700px;">
+            <div class="page-header">
+                <h1 class="page-title">Update Market Prices</h1>
+                <p class="page-subtitle">Set current market prices to calculate profit/loss</p>
+            </div>
+
+            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+            <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+            <div class="card fade-in">
+                <form th:action="@{/prices/update}" method="post">
+                    <div class="form-group">
+                        <label class="form-label" for="goldPrice">🟡 Gold Price Per Gram (₹) *</label>
+                        <input type="number" step="0.01" class="form-control" id="goldPrice" name="goldPrice"
+                            th:value="${goldPrice}" placeholder="Enter current gold price" required>
+                        <p style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 0.5rem;">
+                            Check latest gold rates from market or reliable sources
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="silverPrice">⚪ Silver Price Per Gram (₹) *</label>
+                        <input type="number" step="0.01" class="form-control" id="silverPrice" name="silverPrice"
+                            th:value="${silverPrice}" placeholder="Enter current silver price" required>
+                        <p style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 0.5rem;">
+                            Check latest silver rates from market or reliable sources
+                        </p>
+                    </div>
+
+                    <div
+                        style="background: rgba(99, 102, 241, 0.1); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem;">
+                        <p style="margin: 0; color: var(--text-secondary); font-size: 0.875rem;">
+                            💡 <strong>Note:</strong> These prices are for reference and auto-fill when adding new
+                            investments.
+                            Each investment stores its own price at the time of purchase.
+                        </p>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">💲 Update Prices</button>
+                </form>
+            </div>
+
+            <div class="card" style="margin-top: 1.5rem;">
+                <h3 style="margin-bottom: 1rem;">📊 Quick Reference</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">
+                    You can check current market prices from:
+                </p>
+                <ul style="color: var(--text-secondary); margin-left: 1.5rem;">
+                    <li>Goodreturns.in</li>
+                    <li>Moneycontrol</li>
+                    <li>BankBazaar</li>
+                    <li>Your local jeweler</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

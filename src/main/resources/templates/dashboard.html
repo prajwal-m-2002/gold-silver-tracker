@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Gold & Silver Investment Tracker</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <a href="/" class="navbar-brand">
+                <span class="icon">💎</span>
+                <span>Gold & Silver Tracker</span>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="/" class="active">Dashboard</a></li>
+                <li><a href="/gold">🟡 Gold</a></li>
+                <li><a href="/silver">⚪ Silver</a></li>
+                <li><a href="/prices">Update Prices</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="page-header">
+                <h1 class="page-title">Investment Dashboard</h1>
+                <p class="page-subtitle">Track your precious metal investments in real-time</p>
+            </div>
+
+            <div th:if="${!stats.arePricesAvailable()}" class="alert alert-warning">
+                ⚠️ <strong>Current prices not set!</strong> Please <a href="/prices"
+                    style="color: inherit; text-decoration: underline;">update current market prices</a> to see
+                profit/loss calculations.
+            </div>
+
+            <!-- Gold Summary -->
+            <div class="card fade-in" style="margin-bottom: 2rem; border-left: 4px solid var(--gold-color);">
+                <div class="card-header" style="background: rgba(255, 215, 0, 0.05);">
+                    <h2 class="card-title" style="color: var(--gold-color);">🟡 Gold Summary</h2>
+                    <a href="/gold" class="btn btn-gold btn-sm">View Details</a>
+                </div>
+                <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                    <div class="stat-card gold">
+                        <div class="stat-icon">⚖️</div>
+                        <div class="stat-label">Total Gold</div>
+                        <div class="stat-value">
+                            <span th:text="${#numbers.formatDecimal(stats.totalGoldGrams, 1, 5)}">0.00000</span>
+                            <span class="unit">grams</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card gold">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-label">Amount Invested</div>
+                        <div class="stat-value">
+                            <span class="currency">₹</span>
+                            <span th:text="${#numbers.formatDecimal(stats.goldInvested, 1, 2)}">0.00</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card gold" th:if="${stats.arePricesAvailable()}">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-label">Current Value</div>
+                        <div class="stat-value">
+                            <span class="currency">₹</span>
+                            <span th:text="${#numbers.formatDecimal(stats.goldCurrentValue, 1, 2)}">0.00</span>
+                        </div>
+                        <div class="stat-change">
+                            Current: ₹<span th:text="${#numbers.formatDecimal(stats.goldCurrentPrice, 1, 2)}">0</span>/g
+                        </div>
+                    </div>
+
+                    <div class="stat-card gold" th:if="${stats.arePricesAvailable()}"
+                        th:classappend="${stats.goldProfitLoss >= 0} ? 'profit' : 'loss'">
+                        <div class="stat-icon" th:text="${stats.goldProfitLoss >= 0} ? '🟢' : '🔴'">🟢</div>
+                        <div class="stat-label">Gold Profit / Loss</div>
+                        <div class="stat-value" th:classappend="${stats.goldProfitLoss >= 0} ? 'positive' : 'negative'">
+                            <span class="currency">₹</span>
+                            <span th:text="${#numbers.formatDecimal(stats.goldProfitLoss, 1, 2)}">0.00</span>
+                        </div>
+                        <div class="stat-change"
+                            th:classappend="${stats.goldProfitLoss >= 0} ? 'positive' : 'negative'">
+                            <span th:text="${stats.goldProfitLoss >= 0} ? '▲' : '▼'">▲</span>
+                            <span
+                                th:text="${stats.goldInvested > 0 ? #numbers.formatDecimal((stats.goldProfitLoss / stats.goldInvested) * 100, 1, 2) : '0.00'}">0.00</span>%
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Silver Summary -->
+            <div class="card fade-in" style="margin-bottom: 2rem; border-left: 4px solid var(--silver-color);">
+                <div class="card-header" style="background: rgba(192, 192, 192, 0.05);">
+                    <h2 class="card-title" style="color: var(--silver-color);">⚪ Silver Summary</h2>
+                    <a href="/silver" class="btn btn-silver btn-sm">View Details</a>
+                </div>
+                <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                    <div class="stat-card silver">
+                        <div class="stat-icon">⚖️</div>
+                        <div class="stat-label">Total Silver</div>
+                        <div class="stat-value">
+                            <span th:text="${#numbers.formatDecimal(stats.totalSilverGrams, 1, 5)}">0.00000</span>
+                            <span class="unit">grams</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card silver">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-label">Amount Invested</div>
+                        <div class="stat-value">
+                            <span class="currency">₹</span>
+                            <span th:text="${#numbers.formatDecimal(stats.silverInvested, 1, 2)}">0.00</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card silver" th:if="${stats.arePricesAvailable()}">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-label">Current Value</div>
+                        <div class="stat-value">
+                            <span class="currency">₹</span>
+                            <span th:text="${#numbers.formatDecimal(stats.silverCurrentValue, 1, 2)}">0.00</span>
+                        </div>
+                        <div class="stat-change">
+                            Current: ₹<span
+                                th:text="${#numbers.formatDecimal(stats.silverCurrentPrice, 1, 2)}">0</span>/g
+                        </div>
+                    </div>
+
+                    <div class="stat-card silver" th:if="${stats.arePricesAvailable()}"
+                        th:classappend="${stats.silverProfitLoss >= 0} ? 'profit' : 'loss'">
+                        <div class="stat-icon" th:text="${stats.silverProfitLoss >= 0} ? '🟢' : '🔴'">🟢</div>
+                        <div class="stat-label">Silver Profit / Loss</div>
+                        <div class="stat-value"
+                            th:classappend="${stats.silverProfitLoss >= 0} ? 'positive' : 'negative'">
+                            <span class="currency">₹</span>
+                            <span th:text="${#numbers.formatDecimal(stats.silverProfitLoss, 1, 2)}">0.00</span>
+                        </div>
+                        <div class="stat-change"
+                            th:classappend="${stats.silverProfitLoss >= 0} ? 'positive' : 'negative'">
+                            <span th:text="${stats.silverProfitLoss >= 0} ? '▲' : '▼'">▲</span>
+                            <span
+                                th:text="${stats.silverInvested > 0 ? #numbers.formatDecimal((stats.silverProfitLoss / stats.silverInvested) * 100, 1, 2) : '0.00'}">0.00</span>%
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Overall Summary -->
+            <div class="stats-grid fade-in" style="animation-delay: 0.2s;">
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-label">Total Invested (All Metals)</div>
+                    <div class="stat-value">
+                        <span class="currency">₹</span>
+                        <span th:text="${#numbers.formatDecimal(stats.totalInvested, 1, 2)}">0.00</span>
+                    </div>
+                </div>
+
+                <div class="stat-card" th:if="${stats.arePricesAvailable()}">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-label">Total Current Value</div>
+                    <div class="stat-value">
+                        <span class="currency">₹</span>
+                        <span th:text="${#numbers.formatDecimal(stats.totalCurrentValue, 1, 2)}">0.00</span>
+                    </div>
+                </div>
+
+                <div class="stat-card" th:if="${stats.arePricesAvailable()}"
+                    th:classappend="${stats.isProfit()} ? 'profit' : 'loss'">
+                    <div class="stat-icon" th:text="${stats.isProfit()} ? '🟢' : '🔴'">🟢</div>
+                    <div class="stat-label">Overall Profit / Loss</div>
+                    <div class="stat-value" th:classappend="${stats.isProfit()} ? 'positive' : 'negative'">
+                        <span class="currency">₹</span>
+                        <span th:text="${#numbers.formatDecimal(stats.profitLoss, 1, 2)}">0.00</span>
+                    </div>
+                    <div class="stat-change" th:classappend="${stats.isProfit()} ? 'positive' : 'negative'">
+                        <span th:text="${stats.isProfit()} ? '▲' : '▼'">▲</span>
+                        <span th:text="${#numbers.formatDecimal(stats.profitLossPercentage, 1, 2)}">0.00</span>%
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card fade-in" style="margin-top: 2rem;">
+                <div class="card-header">
+                    <h3 class="card-title">⚡ Quick Actions</h3>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <a href="/gold" class="btn btn-gold">🟡 View Gold Investments</a>
+                    <a href="/silver" class="btn btn-silver">⚪ View Silver Investments</a>
+                    <a href="/prices" class="btn btn-primary">💲 Update Market Prices</a>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

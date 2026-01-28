@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Investment - Gold & Silver Tracker</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <a href="/" class="navbar-brand">
+                <span class="icon">💎</span>
+                <span>Gold & Silver Tracker</span>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="/">Dashboard</a></li>
+                <li><a href="/gold">🟡 Gold</a></li>
+                <li><a href="/silver">⚪ Silver</a></li>
+                <li><a href="/prices">Update Prices</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container" style="max-width: 600px;">
+            <div class="page-header">
+                <h1 class="page-title">Edit Investment</h1>
+                <p class="page-subtitle">Update your investment details</p>
+            </div>
+
+            <div class="card fade-in">
+                <form th:action="@{/investments/edit/{id}(id=${investment.id})}" th:object="${investment}"
+                    method="post">
+                    <div class="form-group">
+                        <label class="form-label" for="metalType">Metal Type *</label>
+                        <select class="form-control form-select" id="metalType" th:field="*{metalType}" required>
+                            <option th:each="metal : ${metalTypes}" th:value="${metal}" th:text="${metal.displayName}">
+                                Gold</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="purchaseDate">Date of Purchase *</label>
+                        <input type="date" class="form-control" id="purchaseDate" th:field="*{purchaseDate}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="amount">Amount Invested (₹) *</label>
+                        <input type="number" step="0.01" class="form-control" id="amount" th:field="*{amount}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="grams">Grams Purchased *</label>
+                        <input type="number" step="0.00001" class="form-control" id="grams" th:field="*{grams}"
+                            required>
+                        <p style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 0.5rem;">
+                            💡 Enter the exact grams you purchased
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="todayPricePerGram">
+                            Today's Price per Gram (₹) *
+                        </label>
+                        <input type="number" step="0.01" class="form-control" id="todayPricePerGram"
+                            th:field="*{todayPricePerGram}" required>
+                        <p style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 0.5rem;">
+                            📊 This price is used to calculate profit/loss
+                        </p>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">💾 Save Changes</button>
+                        <a th:href="@{'/' + ${investment.metalType.name().toLowerCase()}}"
+                            class="btn btn-outline">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>
