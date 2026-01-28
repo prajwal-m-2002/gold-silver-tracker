@@ -1,14 +1,15 @@
-# Use Java 17
 FROM eclipse-temurin:17-jdk-jammy
 
-# App directory
 WORKDIR /app
 
-# Copy everything
+# Copy source
 COPY . .
 
+# Install Maven
+RUN apt-get update && apt-get install -y maven
+
 # Build the app
-RUN ./mvnw clean package -DskipTests
+RUN mvn clean package -DskipTests
 
 # Expose port
 EXPOSE 8080
